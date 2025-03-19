@@ -166,6 +166,18 @@ mkcd() {
    mkdir -p "$1" && cd "$1"
 }
 
+# Clean leftover local branches with no remote ref
+# Does not delete local-only branches, just those that have been pushed but remote no longer exists
+function gitclean() {
+    local delete_command="-d"
+    for arg in "$@"; do
+        if [[ "$arg" == "-f" || "$arg" == "--force" ]]; then
+            delete_command="-D"
+        fi
+    done
+    git fetch -p && git branch -vv | awk '/: gone]/{print $1}' | xargs -r git branch $delete_command
+}
+
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 eval "$(rbenv init - zsh)"
